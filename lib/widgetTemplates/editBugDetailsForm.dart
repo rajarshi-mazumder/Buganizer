@@ -295,7 +295,7 @@ void SendOutNotifications(
     String? toNotifyUser,
     required bool isPriorityChanged}) {
   print("Sending out notiifcation");
-  if (bugSnapshot['assignedTo'] != user?.email) {
+  {
     isPriorityChanged
         ? sendNotificationToAssignedUser(
             "Priority for ${widget.bug['heading']} changed  by ${user?.email}",
