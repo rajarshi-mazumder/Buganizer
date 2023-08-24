@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 sendNotificationToAssignedUser(
     String notifText, String notifType, String? userEmail) async {
   List notifications = [];
+  print("Trying to notify ${userEmail}");
   DocumentReference<Map<String, dynamic>> userRef =
       await FirebaseFirestore.instance.collection("users").doc(userEmail);
   // print("userRef: ${userRef.get().then((value) => null)['email']}");
@@ -17,5 +18,6 @@ sendNotificationToAssignedUser(
       'dateCreated': DateTime.now(),
     });
     userRef.update({'notifications': notifications});
+    print("${userEmail} notified");
   });
 }

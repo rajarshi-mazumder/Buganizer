@@ -48,29 +48,34 @@ class BugsListScreenState extends State<BugsListScreen> {
 
         List<QueryDocumentSnapshot<Map<String, dynamic>>> results = [];
 
-        for (var doc in snapshot.data?.docs ?? []) {
-          var data = doc.data();
-
-          if ((data['id'] != null && data['id'].contains(widget.searchQuery)) ||
-              (data['description'] != null &&
-                  data['description'].contains(widget.searchQuery)) ||
-              (data['heading'] != null &&
-                  data['heading'].contains(widget.searchQuery)) ||
-              (data['assignedTo'] != null &&
-                  data['assignedTo'].contains(widget.searchQuery)) ||
-              (data['createdBy'] != null &&
-                  data['createdBy'].contains(widget.searchQuery)) ||
-              (data['priority'] != null &&
-                  data['priority'].contains(widget.searchQuery)) ||
-              (data['bugType'] != null &&
-                  data['bugType'].contains(widget.searchQuery)) ||
-              (data['component'] != null &&
-                  data['component'].contains(widget.searchQuery))) {
-            results.add(doc);
-          }
-        }
-
         final bugs = snapshot.data?.docs ?? [];
+
+        if (widget.searchQuery != null)
+          for (var doc in snapshot.data?.docs ?? []) {
+            var data = doc.data();
+
+            if ((data['id'] != null &&
+                    data['id'].contains(widget.searchQuery)) ||
+                (data['description'] != null &&
+                    data['description'].contains(widget.searchQuery)) ||
+                (data['heading'] != null &&
+                    data['heading'].contains(widget.searchQuery)) ||
+                (data['assignedTo'] != null &&
+                    data['assignedTo'].contains(widget.searchQuery)) ||
+                (data['createdBy'] != null &&
+                    data['createdBy'].contains(widget.searchQuery)) ||
+                (data['priority'] != null &&
+                    data['priority'].contains(widget.searchQuery)) ||
+                (data['bugType'] != null &&
+                    data['bugType'].contains(widget.searchQuery)) ||
+                (data['component'] != null &&
+                    data['component'].contains(widget.searchQuery))) {
+              results.add(doc);
+            }
+          }
+        else
+          results = bugs;
+
         List thisUsersBugs = [];
 
         if (widget.contextType == "Assigned") {

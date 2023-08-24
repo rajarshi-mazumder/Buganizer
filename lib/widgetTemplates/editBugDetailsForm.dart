@@ -25,6 +25,7 @@ class _BugDetailsFormState extends State<BugDetailsForm> {
   String selectedBugStatus = "Open"; // Initialize with your default value
   String assignedTo = "Not assigned";
   String bugDescription = "No description";
+  bool isPriorityChanged = false;
   List<Map<String, dynamic>>? allUsers;
   void _toggleTextFieldVisibility() {
     setState(() {
@@ -104,6 +105,7 @@ class _BugDetailsFormState extends State<BugDetailsForm> {
                 onChanged: (value) {
                   setState(() {
                     selectedPriority = value!;
+                    isPriorityChanged = true;
                   });
                 },
                 items: priorityOpts.map((option) {
@@ -232,12 +234,6 @@ class _BugDetailsFormState extends State<BugDetailsForm> {
                     .doc(widget.bug['id'])
                     .get();
 
-                SendOutNotifications(
-                    widget: widget,
-                    bugSnapshot: bugSnapshot,
-                    selectedPriority: selectedPriority,
-                    user: widget.user);
-
                 String tempBugStatusType = getBugStatusToSet(selectedBugStatus);
                 print(tempBugStatusType);
                 await FirebaseFirestore.instance
@@ -250,6 +246,15 @@ class _BugDetailsFormState extends State<BugDetailsForm> {
                   'status': selectedBugStatus,
                   'assignedTo': assignedTo,
                   'statusType': tempBugStatusType,
+                }).then((value) {
+                  SendOutNotifications(
+                    widget: widget,
+                    bugSnapshot: bugSnapshot,
+                    selectedPriority: selectedPriority,
+                    user: widget.user,
+                    toNotifyUser: assignedTo,
+                    isPriorityChanged: isPriorityChanged,
+                  );
                 });
 
                 //_commentController.clear();
@@ -283,13 +288,25 @@ class _BugDetailsFormState extends State<BugDetailsForm> {
 }
 
 void SendOutNotifications(
-    {var bugSnapshot, var selectedPriority, var widget, User? user}) {
-  if (bugSnapshot['priority'] != selectedPriority &&
-      bugSnapshot['assignedTo'] != user) {
-    sendNotificationToAssignedUser(
-        "Priority for ${widget.bug['heading']} changed",
-        "Priority Changed by ${user?.email}",
-        widget.bug['assignedTo']);
+    {var bugSnapshot,
+    var selectedPriority,
+    var widget,
+    User? user,
+    String? toNotifyUser,
+    required bool isPriorityChanged}) {
+  print("Sending out notiifcation");
+  if (bugSnapshot['assignedTo'] != user?.email) {
+    isPriorityChanged
+        ? sendNotificationToAssignedUser(
+            "Priority for ${widget.bug['heading']} changed  by ${user?.email}",
+            "Priority changed",
+            toNotifyUser,
+          )
+        : sendNotificationToAssignedUser(
+            " ${widget.bug['heading']} updated by ${user?.email}",
+            "Bug assigned",
+            toNotifyUser,
+          );
   }
 }
 
